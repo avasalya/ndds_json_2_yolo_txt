@@ -2,6 +2,7 @@
 converting https://github.com/NVIDIA/Dataset_Synthesizer bounding box format (.json) into Yolo bbox format (.txt)
 
 **JSON format image settings**
+```
 {
 	"camera_data":
 	{
@@ -31,9 +32,10 @@ converting https://github.com/NVIDIA/Dataset_Synthesizer bounding box format (.j
 	]
 }
 
+```
 
 **JSON camera setting**
-
+```
 {
 	"camera_settings": [
 		{
@@ -57,3 +59,4 @@ converting https://github.com/NVIDIA/Dataset_Synthesizer bounding box format (.j
 		}
 	]
 }
+```
