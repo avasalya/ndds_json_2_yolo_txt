@@ -33,30 +33,3 @@ converting https://github.com/NVIDIA/Dataset_Synthesizer bounding box format (.j
 }
 
 ```
-
-**JSON camera setting**
-```
-{
-	"camera_settings": [
-		{
-			"name": "camera1",
-			"horizontal_fov": 100,
-			"intrinsic_settings":
-			{
-				"resX": 640,
-				"resY": 480,
-				"fx": 268.51190185546875,
-				"fy": 268.51190185546875,
-				"cx": 320,
-				"cy": 240,
-				"s": 0
-			},
-			"captured_image_size":
-			{
-				"width": 640,
-				"height": 480
-			}
-		}
-	]
-}
-```
