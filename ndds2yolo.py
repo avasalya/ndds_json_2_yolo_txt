@@ -51,7 +51,7 @@ def ndds2yolo(fileName, camera_setting, outputfile, img):
 
     for object in range(len(data["objects"])):
         
-        print("detected object", object)
+        print("detected object", object, data["objects"][object]["class"])
         for item in data["objects"][object]:
             
             if item == "bounding_box":
@@ -72,8 +72,7 @@ def ndds2yolo(fileName, camera_setting, outputfile, img):
                 ymax = max(y1, y2)
 
                 xy = (xmin, xmax, ymin, ymax)
-                # xy = (x1, x2, y1, y2)
-                print("xy", xy)
+                # print("ndds_bbox", xy)
                 
                 # image size
                 w = camData["camera_settings"][0]["captured_image_size"]["width"]                
@@ -81,7 +80,11 @@ def ndds2yolo(fileName, camera_setting, outputfile, img):
                 
                 # convert ndds to yolo format
                 x, y, w, h = convert((w, h), xy)
-                print("yolo_bb", x, y, w, h)
+                # print("yolo_bbox", x, y, w, h)
+
+                # visualize bbox remember yolo (x,y) is at center of the box               
+                img = cv.rectangle(img, ( int(x-w/2), int(y-h/2) ), ( int((x+w/2)) , int((y+h/2)) ), (255, 0, 255), 2)
+                cv.imshow('check yolo bb', img)
 
                 # write yolo bbox to txt format
                 bbox = (x, y, w, h)
@@ -89,10 +92,6 @@ def ndds2yolo(fileName, camera_setting, outputfile, img):
                     for item in bbox:
                         f.write("%f\n" % item)
 
-                # visualize bbox remember yolo (x,y) is at center of the box               
-                img = cv.rectangle(img, ( int(x-w/2), int(y-h/2) ), ( int((x+w/2)) , int((y+h/2)) ), (255, 0, 255), 2)
-                
-                cv.imshow('check yolo bb', img)
                 
     return (x, y, w, h)
 
@@ -138,3 +137,4 @@ if __name__ == "__main__":
         
     finishedTime = time.time()
     print('\nfinished in', round(finishedTime-startTime, 2), 'second(s)')
+    
