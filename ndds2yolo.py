@@ -43,11 +43,11 @@ def convert(size, box):
 """ Ashesh Vasalya v.1 """
 def ndds2yolo(fileName, camera_setting, outputfile, img):
 
-    with open(str(fileName)) as annotation:
-        data = json.load(annotation)
+    with open(str(fileName)) as attributes:
+        data = json.load(attributes)
 
-    with open(str(camera_setting)) as annotation:
-        camData = json.load(annotation)
+    with open(str(camera_setting)) as settings:
+        camData = json.load(settings)
 
     for object in range(len(data["objects"])):
         
@@ -84,7 +84,7 @@ def ndds2yolo(fileName, camera_setting, outputfile, img):
 
                 # visualize bbox remember yolo (x,y) is at center of the box               
                 img = cv.rectangle(img, ( int(x-w/2), int(y-h/2) ), ( int((x+w/2)) , int((y+h/2)) ), (255, 0, 255), 2)
-                cv.imshow('check yolo bb', img)
+                cv.imshow('yolo bbox', img)
 
                 # write yolo bbox to txt format
                 bbox = (x, y, w, h)
