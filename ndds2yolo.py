@@ -7,9 +7,6 @@ import json
 import getpass
 import cv2 as cv
 import numpy as np
-from PIL import Image
-import matplotlib.pyplot as plt
-
 
 username = getpass.getuser()
 osName = os.name
@@ -141,18 +138,3 @@ if __name__ == "__main__":
         
     finishedTime = time.time()
     print('\nfinished in', round(finishedTime-startTime, 2), 'second(s)')
-
-
-    # # not in usage
-    # attributes = ["class",
-    #             "instance_id",
-    #             "visibility",
-    #             "location",
-    #             "quaternion_xyzw",
-    #             "pose_transform",
-    #             "cuboid_centroid",
-    #             "projected_cuboid_centroid",
-    #             "bounding_box",
-    #             "cuboid",
-    #             "projected_cuboid"]
-    
