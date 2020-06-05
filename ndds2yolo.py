@@ -15,21 +15,13 @@ if osName == 'posix':
 else:
     os.system('cls')
 
-""" source: https://stackoverflow.com/questions/56115874/how-to-convert-bounding-box-x1-y1-x2-y2-to-yolo-style-x-y-w-h """
-def convert(size, box):
-    # box(x1, x2, y1, y2)
+def convert(box):
     
     """ method1 """
-    dw = 1./size[0]
-    dh = 1./size[1]
-    x = (box[0] + box[1])/2.0
-    y = (box[2] + box[3])/2.0
     w = box[1] - box[0]
     h = box[3] - box[2]
-    # x = x*dw
-    # w = w*dw
-    # y = y*dh
-    # h = h*dh
+    x = (box[0] + box[1])/2.0
+    y = (box[2] + box[3])/2.0
     
     """ method2 """
     # w = box[1] - box[0]
@@ -40,14 +32,10 @@ def convert(size, box):
     return (x,y,w,h)
 
 
-""" Ashesh Vasalya v.1 """
 def ndds2yolo(fileName, camera_setting, outputfile, img):
 
     with open(str(fileName)) as attributes:
         data = json.load(attributes)
-
-    with open(str(camera_setting)) as settings:
-        camData = json.load(settings)
 
     for object in range(len(data["objects"])):
         
@@ -73,17 +61,19 @@ def ndds2yolo(fileName, camera_setting, outputfile, img):
 
                 xy = (xmin, xmax, ymin, ymax)
                 # print("ndds_bbox", xy)
-                
-                # image size
-                w = camData["camera_settings"][0]["captured_image_size"]["width"]                
-                h = camData["camera_settings"][0]["captured_image_size"]["height"]                
-                
+        
                 # convert ndds to yolo format
-                x, y, w, h = convert((w, h), xy)
-                # print("yolo_bbox", x, y, w, h)
+                x, y, w, h = convert(xy)
+                
+                # remember yolo (x,y) is at center of the box 
+                x = round(x - w/2)
+                y = round(y - h/2)
+                w = round(x + w)
+                h = round(y + h)
+                print("yolo_bbox (x, y, w, h)", x, y, w, h)
 
-                # visualize bbox remember yolo (x,y) is at center of the box               
-                img = cv.rectangle(img, ( int(x-w/2), int(y-h/2) ), ( int((x+w/2)) , int((y+h/2)) ), (255, 0, 255), 2)
+                # visualize bbox              
+                img = cv.rectangle(img, (x, y), (w , h), (255, 0, 255), 2)
                 cv.imshow('yolo bbox', img)
 
                 # write yolo bbox to txt format
@@ -137,4 +127,3 @@ if __name__ == "__main__":
         
     finishedTime = time.time()
     print('\nfinished in', round(finishedTime-startTime, 2), 'second(s)')
-    
