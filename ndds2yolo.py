@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import json
+import shutil
 import getpass
 import cv2 as cv
 import numpy as np
@@ -32,27 +33,28 @@ def convert(box):
     return (x,y,w,h)
 
 
-def ndds2yolo(fileName, camera_setting, outputfile, img):
+def ndds2yolo(jsonfile, outputfile, img):
 
-    with open(str(fileName)) as attributes:
+    with open(str(jsonfile)) as attributes:
         data = json.load(attributes)
 
-    for object in range(len(data["objects"])):
+    # erase old bbox files
+    open(outputfile, 'w').close()
+    for obj in range(len(data["objects"])):
         
-        print("detected object", object, data["objects"][object]["class"])
-        for item in data["objects"][object]:
+        print("detected object id", obj, "& class", data["objects"][obj]["class"])    
+        for item in data["objects"][obj]:
             
             if item == "bounding_box":
                 
-                # print(item, ":", data["objects"][object][item])
+                # print(item, ":", data["objects"][obj][item])
                 
-                # read bounding box coordinates
                 # ndds coordinate format is (Y, X) instead of (X, Y)
-                x1 = float(data["objects"][object][item]["top_left"][1])
-                y1 = float(data["objects"][object][item]["top_left"][0])
+                x1 = float(data["objects"][obj][item]["top_left"][1])
+                y1 = float(data["objects"][obj][item]["top_left"][0])
         
-                x2 = float(data["objects"][object][item]["bottom_right"][1])
-                y2 = float(data["objects"][object][item]["bottom_right"][0])
+                x2 = float(data["objects"][obj][item]["bottom_right"][1])
+                y2 = float(data["objects"][obj][item]["bottom_right"][0])
 
                 xmin = min(x1, x2)
                 xmax = max(x1, x2)
@@ -64,7 +66,13 @@ def ndds2yolo(fileName, camera_setting, outputfile, img):
         
                 # convert ndds to yolo format
                 x, y, w, h = convert(xy)
-                
+                bbox = (obj, x, y, w, h)
+
+                # write yolo bbox to txt format
+                with open(outputfile, 'a') as f:
+                    f.write('{} {} {} {} {}'.format(bbox[0], bbox[1], bbox[2], bbox[3], bbox[4]))
+                    f.write("\n")
+
                 # remember yolo (x,y) is at center of the box 
                 x = round(x - w/2)
                 y = round(y - h/2)
@@ -76,13 +84,6 @@ def ndds2yolo(fileName, camera_setting, outputfile, img):
                 img = cv.rectangle(img, (x, y), (w , h), (255, 0, 255), 2)
                 cv.imshow('yolo bbox', img)
 
-                # write yolo bbox to txt format
-                bbox = (x, y, w, h)
-                with open(outputfile, 'a') as f:
-                    for item in bbox:
-                        f.write("%f\n" % item)
-
-                
     return (x, y, w, h)
 
 
@@ -96,34 +97,32 @@ if __name__ == "__main__":
     # path to dir
     path = os.path.dirname(__file__)
     path = path + '/../../../Unreal Projects/Dataset_Synthesizer/Source/NVCapturedData/banjuDRNewMap/'
-    yolobboxTxt = path + "yolobbox" + ".txt"
-
-    #remove old file
-    if os.path.exists(yolobboxTxt):
-        print("deleting old file")
-        os.remove(yolobboxTxt)
-    else:
-        pass
+    saveFolder = path + "names"
+    
 
     # MAIN loop
     for i in range(99):
         
         if i<10:
-            file = "00000" + str(i)
+            fileName = "00000" + str(i)
         else:
-            file = "0000" + str(i)
-                
-        json_file = path + file + ".json"
-        camera_file = path + "_camera_settings.json"
+            fileName = "0000" + str(i)
 
         # read image
-        color = cv.imread(path + file + ".png")
+        image = cv.imread(path + fileName + ".png")
+
+        # paths
+        jsonfile = path + fileName + ".json"
+        outputfile = path + "names/" + fileName + ".txt"
         
         # convert to yolo format
-        ndds2yolo(json_file, camera_file, yolobboxTxt, color)
+        ndds2yolo(jsonfile, outputfile, image)
         
         # comment this if you don't want to display yolo bbox
         cv.waitKey(50)
+        
+        # move color images to same folder as bbox
+        shutil.move((path + fileName + ".png"), saveFolder)
         
     finishedTime = time.time()
     print('\nfinished in', round(finishedTime-startTime, 2), 'second(s)')
